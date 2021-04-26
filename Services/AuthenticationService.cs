@@ -21,9 +21,12 @@ namespace AccessControlAdmin.Services
         
         private readonly IJSRuntime _JSRuntime;
 
-        public AuthenticationService(IJSRuntime jSRuntime)
+        private readonly NavigationManager _NavigationManager;
+
+        public AuthenticationService(IJSRuntime jSRuntime, NavigationManager navigationManager)
         {
             _JSRuntime = jSRuntime;
+            _NavigationManager = navigationManager;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -34,29 +37,23 @@ namespace AccessControlAdmin.Services
             string userData = "";
             try
             {
-                Console.WriteLine("GetAuthenticationiStateAsync");
                 userData = await _JSRuntime.InvokeAsync<string>("blazor_methods.getCookie", "loginCookie");
-                Console.Write(userData == "");
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            Console.Write(userData);
             if (userData != null && userData != "")
             {
                 var user = System.Text.Json.JsonSerializer.Deserialize<Models.User>(userData);
-                Console.WriteLine(user.name);
                 var identity = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, user.name)
                 }, "test authentication type");
-
+                identity.AddClaim(new Claim(ClaimTypes.Role, user.role));
                 state = new AuthenticationState(new ClaimsPrincipal(identity));
             }
-
             NotifyAuthenticationStateChanged(Task.FromResult(state));
-
             return state;
         }
     }
