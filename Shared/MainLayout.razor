@@ -1,10 +1,9 @@
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject AuthenticationService AuthStateProvider
 
 <AuthorizeView>
-    <NotAuthorized>
-        <LoginPage />
-    </NotAuthorized>
     <Authorized>
         <div class="page">
             <div class="sidebar">
@@ -13,7 +12,10 @@
 
             <div class="main">
                 <div class="top-row px-4">
-                    <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+                    <div class="ml-md-auto">
+                        <a href="http://blazor.net" target="_blank" >About</a>
+                        <a href="#" @onclick="OnLogout" >Logout</a>
+                    </div>
                 </div>
 
                 <div class="content px-4">
@@ -22,4 +24,23 @@
             </div>
         </div>
     </Authorized>
+    <NotAuthorized>
+        <LoginPage />
+    </NotAuthorized>
 </AuthorizeView>
+
+@code {
+
+    private async void OnLogout()
+    {
+        Console.WriteLine("Logging Out");
+        CreateCookie("loginCookie", "{}", -1);
+        await AuthStateProvider.GetAuthenticationStateAsync();
+        NavigationManager.NavigateTo("", true);
+     }
+
+    private async void CreateCookie(string name, string value, float days)
+    {
+        await JSRuntime.InvokeAsync<string>("blazor_methods.CreateCookie", name, value, days);
+    }
+}

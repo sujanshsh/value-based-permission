@@ -57,7 +57,7 @@
             string userJSON = System.Text.Json.JsonSerializer.Serialize(user);
             CreateCookie("loginCookie", userJSON, 1/24);
             await AuthStateProvider.GetAuthenticationStateAsync();
-            NavigationManager.NavigateTo("");
+            NavigationManager.NavigateTo("", true);
         }
      }
 

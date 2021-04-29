@@ -22,6 +22,9 @@ window.blazor_methods = {
          }
       }
       return ''
+   },
+   deleteAllCookies: (searchName) => {
+      document.cookie = ''
    }
 }
 

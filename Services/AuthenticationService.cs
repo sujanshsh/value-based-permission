@@ -34,18 +34,23 @@ namespace AccessControlAdmin.Services
             
 
             var state = new AuthenticationState(new ClaimsPrincipal());
-            string userData = "";
+            var userData = "";
             try
             {
+                Console.WriteLine("Reading cookie data...");
                 userData = await _JSRuntime.InvokeAsync<string>("blazor_methods.getCookie", "loginCookie");
+                Console.WriteLine(userData);
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Exception: " + ex.Message);
             }
+
             if (userData != null && userData != "")
             {
                 var user = System.Text.Json.JsonSerializer.Deserialize<Models.User>(userData);
+                Console.WriteLine(user.name);
+                Console.WriteLine(user.role);
                 var identity = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Name, user.name)
