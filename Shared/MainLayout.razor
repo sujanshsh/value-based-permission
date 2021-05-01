@@ -16,6 +16,9 @@
                         <a href="http://blazor.net" target="_blank" >About</a>
                         <a href="#" @onclick="OnLogout" >Logout</a>
                     </div>
+                    <div class="ml-md-auto">
+                        Welcome @context.User.Identity.Name
+                    </div>
                 </div>
 
                 <div class="content px-4">
