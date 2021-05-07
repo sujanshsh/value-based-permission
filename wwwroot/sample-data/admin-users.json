@@ -1,0 +1,23 @@
+[
+    {
+        "id": 1,
+        "username": "shakya.sujan",
+        "name": "Sujan Shakya",
+        "role": "SuperAdmin",
+        "password": "abcd"
+    },
+    {
+        "id": 2,
+        "username": "super.admin",
+        "name": "Super Admin #2",
+        "role": "SuperAdmin",
+        "password": "abcd"
+    },
+    {
+        "id": 2,
+        "username": "admin",
+        "name": "Admin #3",
+        "role": "Admin",
+        "password": "abcd"
+    }
+]
