@@ -4,7 +4,7 @@ We may need a complex type of permissions which is very hard to define and imple
 - CanViewInvoice<Branch>:Own
 - CanViewInvoice<Branch>:12;15
 - CanViewInvoice<Region>:Own
-- CanViewInvoice<Region>:Asia;Africa
+- CanViewInvoice<Region>:Asia;Africa<TimeRange>:11:00-15:00
 - CanCancelnvoice<TimeRange>:11:00-15:00
 - CanCancelnvoice<Branch>:Own
 - CanCancelnvoice<Day>:Mon;Tue;Wed;Thu;Fri
