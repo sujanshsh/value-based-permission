@@ -8,14 +8,11 @@
 
 <div class="page">
     <div class="main">
-        <div class="top-row px-4">
-            <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
-        </div>
-
-        <div class="content px-4">
+        <div class="content px-4 mx-auto" style="width:30rem;">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
+                        <h3>Access Control Admin - Login</h3>
                         <EditForm Model="user" OnSubmit="OnLoginSubmit" name="login_form" id="login-form" class="form">
                             <div class="form-group">
                                 <InputText @bind-Value="user.username" class="form-control" type="text" name="username" placeholder="Username" />
