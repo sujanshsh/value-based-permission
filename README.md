@@ -16,3 +16,6 @@ I think role names should be written in dot notation for better clarity and easy
 - Accounts.Central
 - Sales.Region.Asia
 - Sales.Region.All
+
+# Reference
+Functional and RBAC learned from [https://www.visual-guard.com/EN/net-powerbuilder-application-security-authentication-permission-access-control-rbac-articles/dotnet-security-article-ressources/iam-best-practices.php](https://www.visual-guard.com/EN/net-powerbuilder-application-security-authentication-permission-access-control-rbac-articles/dotnet-security-article-ressources/iam-best-practices.php)
