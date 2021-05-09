@@ -1,0 +1,31 @@
+[
+    {
+        "id": 1,
+        "name": "Branch",
+        "description": "Branch Office",
+        "values": [
+            {
+                "label": "Branch A",
+                "value": 1
+            },
+            {
+                "label": "Branch B",
+                "value": 1
+            },
+            {
+                "label": "Branch C",
+                "value": 1
+            },
+            {
+                "label": "Branch D",
+                "value": 1
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "TimeRange",
+        "description": "Branch Office",
+        "type": "TimeRange"
+    }
+]

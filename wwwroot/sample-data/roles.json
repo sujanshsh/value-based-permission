@@ -1,0 +1,27 @@
+[
+    {
+        "id": 1,
+        "name": "Sales",
+        "description": "Sales Person"
+    },
+    {
+        "id": 1,
+        "name": "Accountant",
+        "description": "Accountant"
+    },
+    {
+        "id": 1,
+        "name": "Accountant.Branch",
+        "description": "Accountant"
+    },
+    {
+        "id": 1,
+        "name": "Manager",
+        "description": "Sales Person"
+    },
+    {
+        "id": 1,
+        "name": "Owner",
+        "description": "Accountant"
+    }
+]
