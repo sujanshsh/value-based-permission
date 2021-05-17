@@ -1,16 +1,16 @@
 @page "/roles"
 
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<h1>Roles</h1>
+<RolesTable RolesData="roles">
+</RolesTable>
 
 @code {
-    private int currentCount = 0;
+    private Models.Role[] roles;
 
-    private void IncrementCount()
+    [Inject]
+    private HttpClient httpClient { get; set; }
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("sample-data/roles.json");
     }
 }

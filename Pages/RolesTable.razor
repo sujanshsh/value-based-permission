@@ -1,0 +1,14 @@
+﻿@using BlazorTable
+
+
+<Table TableItem="Models.Role" Items="RolesData" PageSize="5">
+    <Column TableItem="Models.Role" Title="ID" Field="@(x => x.id)" Sortable="true" Filterable="false" />
+    <Column TableItem="Models.Role" Title="Name" Field="@(x => x.name)" Sortable="true" Filterable="true" />
+    <Column TableItem="Models.Role" Title="Description" Field="@(x => x.description)" Sortable="true" Filterable="true" />
+</Table>
+
+@code {
+
+    [Parameter]
+    public Models.Role[] RolesData {get; set;}
+}
