@@ -1,14 +1,53 @@
 ﻿@using BlazorTable
 
 
-<Table TableItem="Models.Role" Items="RolesData" PageSize="5">
-    <Column TableItem="Models.Role" Title="ID" Field="@(x => x.id)" Sortable="true" Filterable="false" />
-    <Column TableItem="Models.Role" Title="Name" Field="@(x => x.name)" Sortable="true" Filterable="true" />
-    <Column TableItem="Models.Role" Title="Description" Field="@(x => x.description)" Sortable="true" Filterable="true" />
-</Table>
-
+<MudContainer>
+@if (RolesData.Length > 0) {
+    <MudTable Items="@RolesData" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped" Filter="new Func<Models.Role,bool>(FilterFunc)" @bind-SelectedItem="selectedItem">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Periodic Elements</MudText>
+            <MudToolBarSpacer />
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh>ID</MudTh>
+            <MudTh>Name</MudTh>
+            <MudTh>Description</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="ID">@context.id</MudTd>
+            <MudTd DataLabel="Name">@context.name</MudTd>
+            <MudTd DataLabel="Description">@context.description</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+} else {
+    <MudAlert Severity="Severity.Normal">Loading...</MudAlert>
+}
+</MudContainer>
 @code {
 
+    private bool dense = true;
+    private bool hover = true;
+    private bool striped = true;
+    private bool bordered = true;
+    private string searchString = "";
+
     [Parameter]
-    public Models.Role[] RolesData {get; set;}
+    public Models.Role[] RolesData {get; set;} = new Models.Role[0];
+
+    private Models.Role selectedItem = null;
+
+    private bool FilterFunc(Models.Role element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
 }

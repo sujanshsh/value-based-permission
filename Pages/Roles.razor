@@ -6,7 +6,7 @@
 </RolesTable>
 
 @code {
-    private Models.Role[] roles;
+    private Models.Role[] roles = new Models.Role[0];
 
     [Inject]
     private HttpClient httpClient { get; set; }
