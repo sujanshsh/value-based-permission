@@ -8,9 +8,10 @@
 @using Models
 @using System.ComponentModel.DataAnnotations
 
+
 <MudGrid Spacing="2" Justify="Justify.Center">
     <MudItem>
-        <div style="max-width: 400px;">
+        <div style="max-width: 600px;">
             <EditForm Model="@user" OnValidSubmit="OnLoginSubmit">
                 <DataAnnotationsValidator />
                 <MudCard>
