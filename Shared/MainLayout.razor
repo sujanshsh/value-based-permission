@@ -4,35 +4,47 @@
 @inject AuthenticationService AuthStateProvider
 @using MudBlazor
 
-<AuthorizeView>
-    <Authorized>
-        <MudThemeProvider />
-        <MudLayout>
-            <MudAppBar Elevation="1">
-                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-                    OnClick="@((e) => DrawerToggle())" />
-                <MudAppBarSpacer />
-                <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
-            </MudAppBar>
-            <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
-                <MudDrawerHeader>
-                    <MudText Typo="Typo.h5" Class="mt-1">Access Control Admin</MudText>
-                </MudDrawerHeader>
-                <NavMenu/>
-            </MudDrawer>
-            <MudMainContent>
-                @Body
-            </MudMainContent>
-        </MudLayout>
-    </Authorized>
-    <NotAuthorized>
-        <LoginPage />
-    </NotAuthorized>
-</AuthorizeView>
 
+<MudThemeProvider />
+<MudLayout>
+    @if(!NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith("login")) {
+        <MudAppBar Elevation="1">
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                OnClick="@((e) => DrawerToggle())" />
+            <MudAppBarSpacer />
+            <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" />
+        </MudAppBar>
+        <MudDrawer @bind-Open="_drawerOpen" Elevation="2">
+            <MudDrawerHeader>
+                <MudText Typo="Typo.h5" Class="mt-1">Access Control Admin</MudText>
+            </MudDrawerHeader>
+            <NavMenu/>
+        </MudDrawer>
+    }
+    <MudMainContent>
+        @Body
+    </MudMainContent>
+</MudLayout>
 @code {
 
     private bool  _drawerOpen = true;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var authState = await authenticationStateTask;
+        if (authState is not null) {
+            var user = authState.User;
+            
+            if (user is null || user.Identity is null || !user.Identity.IsAuthenticated)
+            {
+                NavigationManager.NavigateTo($"login?returnUrl={Uri.EscapeDataString(NavigationManager.Uri)}");
+            }
+        }
+    }
 
     private async void OnLogout()
     {
