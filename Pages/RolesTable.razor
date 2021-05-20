@@ -24,7 +24,7 @@
         </PagerContent>
     </MudTable>
 } else {
-    <MudAlert Severity="Severity.Normal">Loading...</MudAlert>
+    <MudAlert Severity="Severity.Normal">@(Loading ? "Loading..." : "No Data")</MudAlert>
 }
 </MudContainer>
 @code {
@@ -38,6 +38,8 @@
     [Parameter]
     public Models.Role[] RolesData {get; set;} = new Models.Role[0];
 
+    [Parameter]
+    public bool Loading {get; set;} = false;
     private Models.Role selectedItem = null;
 
     private bool FilterFunc(Models.Role element)

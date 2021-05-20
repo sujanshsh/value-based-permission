@@ -2,16 +2,20 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
 <h1>Roles</h1>
-<RolesTable RolesData="roles">
+<RolesTable RolesData="roles" Loading="@loadingRoles">
 </RolesTable>
 
 @code {
     private Models.Role[] roles = new Models.Role[0];
 
+    private bool loadingRoles = false;
+
     [Inject]
     private HttpClient httpClient { get; set; }
     protected override async Task OnInitializedAsync()
     {
+        loadingRoles = true;
         roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        loadingRoles = false;
     }
 }
