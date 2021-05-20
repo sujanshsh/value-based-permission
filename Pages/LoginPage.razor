@@ -40,18 +40,21 @@
     protected async override Task OnInitializedAsync()
     {
         base.OnInitialized();
-        var user = (await AuthStat).User;
-        if(user.Identity.IsAuthenticated)
-        {
-            var query = new Uri(NavigationManager.Uri).Query;
-            QueryString parsedQuery = await ParseQueryString(query);
-            if (parsedQuery.returnUrl != null && parsedQuery.returnUrl != "")
+        var authenticationState = await AuthStat;
+        if (authenticationState is not null) {
+            var user = authenticationState.User;
+            if(user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
             {
-                NavigationManager.NavigateTo(parsedQuery.returnUrl);
-                return;
+                var query = new Uri(NavigationManager.Uri).Query;
+                QueryString parsedQuery = await ParseQueryString(query);
+                if (parsedQuery.returnUrl != null && parsedQuery.returnUrl != "")
+                {
+                    NavigationManager.NavigateTo(parsedQuery.returnUrl);
+                    return;
+                }
+                NavigationManager.NavigateTo("");
             }
         }
-        NavigationManager.NavigateTo("");
     }
 
     private Models.User user = new Models.User();
@@ -61,7 +64,7 @@
     private async void OnLoginSubmit()
     {
         Console.WriteLine("Logging In");
-        users = await Http.GetFromJsonAsync<Models.User[]>("users");
+        users = await Http.GetFromJsonAsync<Models.User[]>("access-control-users");
         try {
             user = users.First<Models.User>(c => c.username == user.username && c.password == user.password);
         }
