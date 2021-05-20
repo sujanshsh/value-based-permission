@@ -34,7 +34,14 @@
     private async Task loadRoles()
     {
         loadingRoles = true;
-        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        try
+        {
+            roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        }
+        catch
+        {
+            loadingRoles = false;
+        }
         loadingRoles = false;
     }
     protected override async Task OnInitializedAsync()
@@ -56,8 +63,14 @@
         {
             Models.Role newRole = dialog.Data as Models.Role;
  
-            await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
-
+            try
+            {
+                await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
+            }
+            catch
+            {
+                return;
+            }
             await loadRoles();
         }
     }
