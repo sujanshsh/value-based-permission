@@ -1,0 +1,71 @@
+@page "/value-types"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+
+<div class="card" style="width:30rem;">
+    <div class="card-body">
+        <div class="card-title">Types of Values</div>
+        <div class="card-text">
+            <EditForm Model="valueType" class="container">
+                <input type="hidden" id="" @bind-value="valueType.id" />
+                <div class="row my-2">
+                    <div class="col-5">
+                        <label for="name">Name</label>
+                    </div>
+                    <div class="col-7">
+                        <input type="text" id="name" class="form-control" @bind-value="valueType.name"
+                            placeholder="Name" />
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-5">
+                        <label for="description">Description</label>
+                    </div>
+                    <div class="col-7">
+                        <textarea rows="2" cols="40" id="description" class="form-control" @bind="valueType.description"
+                            placeholder="Description"></textarea>
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-5">
+                        <label for="url">URL</label>
+                    </div>
+                    <div class="col-7">
+                        <input type="text" id="url" class="form-control" @bind-value="valueType.URL"
+                            placeholder="URL" />
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-5">
+                        <label for="refersh-interval">Refresh Interval</label>
+                    </div>
+                    <div class="col-7">
+                        <input type="number" id="refersh-interval" class="form-control"
+                            @bind-value="valueType.refreshIntervalMinutes" placeholder="Refresh Interval in minutes." />
+                    </div>
+                </div>
+                <div class="row my-2">
+                    <div class="col-5">
+                        <label for="event-topic">Event Trigger Topic Name</label>
+                    </div>
+                    <div class="col-7">
+                        <input type="text" id="event-topic" class="form-control"
+                            @bind-value="valueType.refreshTriggerEventTopic" placeholder="Topic name of the event" />
+                    </div>
+                    <div class="col-12">
+                        <div class="custom-control custom-checkbox mb-3 text-right">
+                            <input type="checkbox" class="custom-control-input" id="enable-trigger-chk" required
+                                @bind-value="valueType.refreshTriggerEnable">
+                            <label class="custom-control-label" for="enable-trigger-chk">Enable Event Trigger?</label>
+                            <div class="invalid-feedback">Invalid option</div>
+                        </div>
+                    </div>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code {
+    private Models.ValueType valueType = new Models.ValueType();
+
+}

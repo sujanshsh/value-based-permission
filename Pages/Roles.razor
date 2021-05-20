@@ -1,16 +1,64 @@
 @page "/roles"
+@inject IDialogService DialogService
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<MudPaper Height="400px" Width="100%" Style="margin: 10px;">
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="3">
+                <MudText Typo="Typo.h3">Roles</MudText>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(e => OnCreateRole())">Create Role</MudButton>
+            </MudItem>
+            <MudItem xs="12">
+                <RolesTable RolesData="roles" Loading="@loadingRoles">
+                </RolesTable>
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudPaper>
 
 @code {
-    private int currentCount = 0;
+    private Models.Role[] roles = new Models.Role[0];
 
-    private void IncrementCount()
+    private bool loadingRoles = false;
+
+    [Inject]
+    private HttpClient httpClient { get; set; }
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    void Close() => MudDialog.Close(DialogResult.Ok(true));
+
+    private async Task loadRoles()
     {
-        currentCount++;
+        loadingRoles = true;
+        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        loadingRoles = false;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await loadRoles();
+    }
+
+    private async Task OnCreateRole()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("role", new Models.Role());
+
+        var options = new DialogOptions();
+        options.CloseButton = true;
+
+        var dialog = await DialogService.Show<CreateRoleDialog>("Create A Role", parameters, options).Result;
+        
+        if (dialog.Data != null)
+        {
+            Models.Role newRole = dialog.Data as Models.Role;
+ 
+            await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
+
+            await loadRoles();
+        }
     }
 }

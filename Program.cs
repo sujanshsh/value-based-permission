@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 
 namespace AccessControlAdmin
 {
@@ -19,12 +20,15 @@ namespace AccessControlAdmin
             builder.RootComponents.Add<App>("#app");
 
             builder.Services.AddSingleton<Services.AuthenticationService>();
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            // builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:3000") });
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, Services.AuthenticationService>();
 
+            builder.Services.AddMudServices();
+            
             await builder.Build().RunAsync();
         }
     }

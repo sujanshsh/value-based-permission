@@ -1,47 +1,7 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
-    <a class="navbar-brand" href="">AccessControlAdmin</a>
-    <button class="navbar-toggler" @onclick="ToggleNavMenu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-</div>
-
-<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
-    <ul class="nav flex-column">
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="attributes" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> ValueTypes
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="roles">
-                <span class="oi oi-plus" aria-hidden="true"></span> Roles
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="permissions">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Permissions
-            </NavLink>
-        </li>
-        <li class="nav-item px-3">
-            <NavLink class="nav-link" href="applications">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Applications
-            </NavLink>
-        </li>
-    </ul>
-</div>
-
-@code {
-    private bool collapseNavMenu = true;
-
-    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
-    {
-        collapseNavMenu = !collapseNavMenu;
-    }
-}
+﻿<MudNavMenu>
+    <MudNavLink Href="/" Icon="@Icons.Filled.Home">Home</MudNavLink>
+    <MudNavLink Href="/roles" Icon="@Icons.Filled.Storage">Roles</MudNavLink>
+    <MudNavLink Href="/permissions" Icon="@Icons.Filled.Receipt" >Permissions</MudNavLink>
+    <MudNavLink Href="/value-types" Icon="@Icons.Filled.Storage">Value Types</MudNavLink>
+    <MudNavLink Href="/applications" Icon="@Icons.Filled.Storage">Applications</MudNavLink>
+</MudNavMenu>

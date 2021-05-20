@@ -1,0 +1,32 @@
+[
+    {
+        "id": 1,
+        "name": "InvoiceAllAccess",
+        "description": "Full access to invoice: View, Create and Print"
+    },
+    {
+        "id": 1,
+        "name": "InvoiceViewAccess",
+        "description": "Only View Invoices of own branch"
+    },
+    {
+        "id": 1,
+        "name": "AdditionalBranchAccess::{\"Branch\":{\"Values\":[\"1\",\"2\"]}}",
+        "description": "Only View Invoices of 2 branches"
+    },
+    {
+        "id": 1,
+        "name": "InvoiceViewAccessExceptHO::{\"Branch\":{\"Compare\":\"Except\",\"Values\":[\"1\",\"2\"]}}",
+        "description": "Only View Invoices of 2 branches"
+    },
+    {
+        "id": 1,
+        "name": "SalesViewAccess",
+        "description": "Only View Sales"
+    },
+    {
+        "id": 1,
+        "name": "SalesAccess::{\"Branch\":{\"Values\":[\"Own\"]}},\"TimeRange\":{\"Values\":[\"05:00 AM\",\"10:00 PM\"]}}",
+        "description": "Access to create sales of own branch from 5 AM to 10 PM only"
+    }
+]

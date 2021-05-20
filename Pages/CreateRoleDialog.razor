@@ -1,0 +1,19 @@
+<MudDialog>
+    <DialogContent>
+        <MudTextField T="string" Label="Name" @bind-Value="role.name"/>
+        <MudTextField T="string" Label="Description" @bind-Value="role.description"/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Create</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [Parameter] public Models.Role role {get; set;} = new Models.Role();
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private void Cancel() => MudDialog.Cancel();
+    void Submit() => MudDialog.Close(DialogResult.Ok<Models.Role>(role));
+}

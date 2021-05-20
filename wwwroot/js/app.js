@@ -25,6 +25,14 @@ window.blazor_methods = {
    },
    deleteAllCookies: (searchName) => {
       document.cookie = ''
+   },
+   createQueryString: (queryString) => {
+      const params = new URLSearchParams(queryString)
+      const data = {}
+      for (p of params.entries()) {
+         data[p[0]] = p[1]
+      }
+      return data
    }
 }
 

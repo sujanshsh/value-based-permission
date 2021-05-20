@@ -1,0 +1,102 @@
+@page "/login"
+
+@using System.Linq;
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationService AuthStateProvider
+@using Models
+@using System.ComponentModel.DataAnnotations
+
+
+<MudGrid Spacing="2" Justify="Justify.Center">
+    <MudItem>
+        <div style="max-width: 600px;">
+            <EditForm Model="@user" OnValidSubmit="OnLoginSubmit">
+                <DataAnnotationsValidator />
+                <MudCard>
+                    <MudCardContent>
+                        <MudTextField Label="Username" Class="mt-3"
+                                    @bind-Value="user.username" For="@(() => user.username)" />
+                        <MudTextField Label="Password" HelperText="Choose a strong password" Class="mt-3"
+                                    @bind-Value="user.password" For="@(() => user.password)" InputType="InputType.Password" />
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Login</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </EditForm>
+        </div>
+    </MudItem>
+</MudGrid>
+@code {
+
+    [CascadingParameter] protected Task<AuthenticationState> AuthStat { get; set; }
+
+    class QueryString {
+        public string returnUrl {get; set;}
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+        var authenticationState = await AuthStat;
+        if (authenticationState is not null) {
+            var user = authenticationState.User;
+            if(user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                var query = new Uri(NavigationManager.Uri).Query;
+                QueryString parsedQuery = await ParseQueryString(query);
+                if (parsedQuery.returnUrl != null && parsedQuery.returnUrl != "")
+                {
+                    NavigationManager.NavigateTo(parsedQuery.returnUrl);
+                    return;
+                }
+                NavigationManager.NavigateTo("");
+            }
+        }
+    }
+
+    private Models.User user = new Models.User();
+
+    private Models.User[] users;
+
+    private async void OnLoginSubmit()
+    {
+        Console.WriteLine("Logging In");
+        users = await Http.GetFromJsonAsync<Models.User[]>("access-control-users");
+        try {
+            user = users.First<Models.User>(c => c.username == user.username && c.password == user.password);
+        }
+        catch(Exception) {
+            return;
+        }
+        if (user != null) {
+            Console.WriteLine("User Found! username = " + user.username);
+            string userJSON = System.Text.Json.JsonSerializer.Serialize(user);
+            CreateCookie("loginCookie", userJSON, 1/24);
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            
+            var query = new Uri(NavigationManager.Uri).Query;
+            QueryString parsedQuery = await ParseQueryString(query);
+            if (parsedQuery.returnUrl != null && parsedQuery.returnUrl != "")
+            {
+                NavigationManager.NavigateTo(parsedQuery.returnUrl, true);
+            }
+            else
+            {
+                NavigationManager.NavigateTo("", true);
+            }            
+        }
+     }
+
+    private async void CreateCookie(string name, string value, float days)
+    {
+        await JSRuntime.InvokeAsync<string>("blazor_methods.CreateCookie", name, value, days);
+    }
+
+    private async Task<QueryString> ParseQueryString(string queryString)
+    {
+        return await JSRuntime.InvokeAsync<QueryString>("blazor_methods.createQueryString", queryString);
+    }
+}
