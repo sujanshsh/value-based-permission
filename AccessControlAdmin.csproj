@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorTable" Version="1.15.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="5.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="5.0.5" />

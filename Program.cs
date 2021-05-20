@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using BlazorTable;
 using MudBlazor.Services;
 
 namespace AccessControlAdmin
@@ -26,8 +25,6 @@ namespace AccessControlAdmin
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
             builder.Services.AddScoped<AuthenticationStateProvider, Services.AuthenticationService>();
-
-            builder.Services.AddBlazorTable();
 
             builder.Services.AddMudServices();
             
