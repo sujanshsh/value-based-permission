@@ -12,6 +12,6 @@
     private HttpClient httpClient { get; set; }
     protected override async Task OnInitializedAsync()
     {
-        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("sample-data/roles.json");
+        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
     }
 }

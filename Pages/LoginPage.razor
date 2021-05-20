@@ -61,7 +61,7 @@
     private async void OnLoginSubmit()
     {
         Console.WriteLine("Logging In");
-        users = await Http.GetFromJsonAsync<Models.User[]>("sample-data/admin-users.json");
+        users = await Http.GetFromJsonAsync<Models.User[]>("users");
         try {
             user = users.First<Models.User>(c => c.username == user.username && c.password == user.password);
         }
