@@ -1,15 +1,25 @@
 @page "/roles"
-@inject IDialogService DialogService
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 
-<MudPaper Height="400px" Width="100%" Style="margin: 10px;">
+<MudPaper Width="100%" Style="margin: 10px;">
+    <MudDialog @bind-IsVisible="createDialogOpened">
+        <TitleContent>Create A Role</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="newRole.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="newRole.description" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitRole">Create</MudButton>
+        </DialogActions>
+    </MudDialog>
     <MudContainer>
         <MudGrid>
             <MudItem xs="3">
                 <MudText Typo="Typo.h3">Roles</MudText>
             </MudItem>
             <MudItem xs="3">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(e => OnCreateRole())">Create Role</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreateRole">Create Role</MudButton>
             </MudItem>
             <MudItem xs="12">
                 <RolesTable RolesData="roles" Loading="@loadingRoles">
@@ -22,14 +32,16 @@
 @code {
     private Models.Role[] roles = new Models.Role[0];
 
+    public Models.Role newRole = new Models.Role();
+
     private bool loadingRoles = false;
 
     [Inject]
     private HttpClient httpClient { get; set; }
 
+    private bool createDialogOpened = false;
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    void Close() => MudDialog.Close(DialogResult.Ok(true));
 
     private async Task loadRoles()
     {
@@ -49,20 +61,17 @@
         await loadRoles();
     }
 
-    private async Task OnCreateRole()
+    private void Cancel() => createDialogOpened = false;
+
+    private void OnCreateRole()
     {
-        var parameters = new DialogParameters();
-        parameters.Add("role", new Models.Role());
+        createDialogOpened = true;
+    }
 
-        var options = new DialogOptions();
-        options.CloseButton = true;
-
-        var dialog = await DialogService.Show<CreateRoleDialog>("Create A Role", parameters, options).Result;
-        
-        if (dialog.Data != null)
+    private async Task OnSubmitRole()
+    {
+        if (newRole.name != "" && newRole.description != "")
         {
-            Models.Role newRole = dialog.Data as Models.Role;
- 
             try
             {
                 await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
@@ -73,5 +82,6 @@
             }
             await loadRoles();
         }
+        createDialogOpened = false;
     }
 }
