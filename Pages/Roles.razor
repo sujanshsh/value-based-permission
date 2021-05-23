@@ -125,7 +125,10 @@
 
     private void OnEditRole(int id)
     {
-        editRole = Array.FindAll<Models.Role>(roles, r => r.id == id).FirstOrDefault();
+        var roleToEdit = Array.FindAll<Models.Role>(roles, r => r.id == id).FirstOrDefault();
+        editRole.id = roleToEdit.id;
+        editRole.name = roleToEdit.name;
+        editRole.description = roleToEdit.description;
         editDialogOpened = true;
     }
 
