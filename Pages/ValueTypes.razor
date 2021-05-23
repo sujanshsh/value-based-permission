@@ -1,71 +1,204 @@
 @page "/value-types"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IDialogService DialogService
 
-<div class="card" style="width:30rem;">
-    <div class="card-body">
-        <div class="card-title">Types of Values</div>
-        <div class="card-text">
-            <EditForm Model="valueType" class="container">
-                <input type="hidden" id="" @bind-value="valueType.id" />
-                <div class="row my-2">
-                    <div class="col-5">
-                        <label for="name">Name</label>
-                    </div>
-                    <div class="col-7">
-                        <input type="text" id="name" class="form-control" @bind-value="valueType.name"
-                            placeholder="Name" />
-                    </div>
-                </div>
-                <div class="row my-2">
-                    <div class="col-5">
-                        <label for="description">Description</label>
-                    </div>
-                    <div class="col-7">
-                        <textarea rows="2" cols="40" id="description" class="form-control" @bind="valueType.description"
-                            placeholder="Description"></textarea>
-                    </div>
-                </div>
-                <div class="row my-2">
-                    <div class="col-5">
-                        <label for="url">URL</label>
-                    </div>
-                    <div class="col-7">
-                        <input type="text" id="url" class="form-control" @bind-value="valueType.URL"
-                            placeholder="URL" />
-                    </div>
-                </div>
-                <div class="row my-2">
-                    <div class="col-5">
-                        <label for="refersh-interval">Refresh Interval</label>
-                    </div>
-                    <div class="col-7">
-                        <input type="number" id="refersh-interval" class="form-control"
-                            @bind-value="valueType.refreshIntervalMinutes" placeholder="Refresh Interval in minutes." />
-                    </div>
-                </div>
-                <div class="row my-2">
-                    <div class="col-5">
-                        <label for="event-topic">Event Trigger Topic Name</label>
-                    </div>
-                    <div class="col-7">
-                        <input type="text" id="event-topic" class="form-control"
-                            @bind-value="valueType.refreshTriggerEventTopic" placeholder="Topic name of the event" />
-                    </div>
-                    <div class="col-12">
-                        <div class="custom-control custom-checkbox mb-3 text-right">
-                            <input type="checkbox" class="custom-control-input" id="enable-trigger-chk" required
-                                @bind-value="valueType.refreshTriggerEnable">
-                            <label class="custom-control-label" for="enable-trigger-chk">Enable Event Trigger?</label>
-                            <div class="invalid-feedback">Invalid option</div>
-                        </div>
-                    </div>
-                </div>
-            </EditForm>
-        </div>
-    </div>
-</div>
+
+
+<MudPaper Width="100%" Style="margin: 10px;">
+    <MudDialog @bind-IsVisible="createDialogOpened">
+        <TitleContent>Create A Value Type</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="newValueType.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="newValueType.description" Style="width: 300px;"/>
+            <MudTextField T="string" Label="URL" @bind-Value="newValueType.URL" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelCreateDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitValueType">Create</MudButton>
+        </DialogActions>
+    </MudDialog>
+    <MudDialog @bind-IsVisible="editDialogOpened">
+        <TitleContent>Edit Value Type</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="editValueType.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="editValueType.description" Style="width: 300px;"/>
+            <MudTextField T="string" Label="URL" @bind-Value="editValueType.URL" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelEditDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitEditValueType">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="3">
+                <MudText Typo="Typo.h3">Types of Values</MudText>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreateValueType">Create Value Type</MudButton>
+            </MudItem>
+            <MudItem xs="12">
+            @if (valueTypes.Length > 0) {
+                <MudTable Items="@valueTypes" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.ValueType,bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Types of Values</MudText>
+                        <MudToolBarSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>URL</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.id</MudTd>
+                        <MudTd DataLabel="Name">@context.name</MudTd>
+                        <MudTd DataLabel="Description">@context.description</MudTd>
+                        <MudTd DataLabel="Description">@context.URL</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteRole(context.id))" ></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            } else {
+                <MudAlert Severity="Severity.Normal">@(loadingValueTypes ? "Loading..." : "No Data")</MudAlert>
+            }
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudPaper>
 
 @code {
-    private Models.ValueType valueType = new Models.ValueType();
+    private Models.ValueType[] valueTypes = new Models.ValueType[0];
 
+    public Models.ValueType newValueType = new Models.ValueType();
+    public Models.ValueType editValueType = new Models.ValueType();
+
+    private bool loadingValueTypes = false;
+    private string searchString = "";
+
+    [Inject]
+    private HttpClient httpClient { get; set; }
+
+    private bool createDialogOpened = false;
+    private bool editDialogOpened = false;
+    private bool FilterFunc(Models.ValueType element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+
+    private async Task loadValueTypes()
+    {
+        loadingValueTypes = true;
+        try
+        {
+            valueTypes = await httpClient.GetFromJsonAsync<Models.ValueType[]>("value-types");
+        }
+        catch
+        {
+            loadingValueTypes = false;
+        }
+        loadingValueTypes = false;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await loadValueTypes();
+    }
+
+    private void CancelCreateDialog() => createDialogOpened = false;
+    private void CancelEditDialog() => editDialogOpened = false;
+
+    private void OnCreateValueType()
+    {
+        createDialogOpened = true;
+    }
+
+    private void OnEditValueType(int id)
+    {
+        var selectedValueType = Array.FindAll<Models.ValueType>(valueTypes, r => r.id == id).FirstOrDefault();
+        editValueType.id = selectedValueType.id;
+        editValueType.name = selectedValueType.name;
+        editValueType.description = selectedValueType.description;
+        editValueType.URL = selectedValueType.URL;
+        editDialogOpened = true;
+    }
+
+    private async Task OnSubmitValueType()
+    {
+        if (newValueType.name != "" && newValueType.description != "")
+        {
+            try
+            {
+                await httpClient.PostAsJsonAsync<Models.ValueType>("value-types", newValueType);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
+        createDialogOpened = false;
+    }
+
+    private async Task OnSubmitEditValueType()
+    {
+        if (editValueType.name != "" && editValueType.description != "")
+        {
+            try
+            {
+                await httpClient.PutAsJsonAsync<Models.ValueType>("value-types/" + editValueType.id, editValueType);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
+        editDialogOpened = false;
+    }
+
+
+    private async Task OnDeleteRole(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteRole(id);
+            }            
+        }
+    }
+
+    private async Task DeleteRole(int id)
+    {
+        if (id > 0)
+        {
+            try
+            {
+                await httpClient.DeleteAsync("value-types/" + id);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
+    }
 }
