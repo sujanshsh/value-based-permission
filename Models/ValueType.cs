@@ -8,8 +8,7 @@ namespace AccessControlAdmin.Models
         public string name { get; set; } = "";
         public string description { get; set; } = "";
         public string URL { get; set; } = "";
-        public int refreshIntervalMinutes { get; set; } = 0;
-        public string refreshTriggerEventTopic { get; set; } = "";
-        public bool refreshTriggerEnable { get; set; } = false;
+        public string createdAt { get; set; } = "";
+        public string updatedAt { get; set; } = "";
     }
 }
