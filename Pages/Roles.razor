@@ -1,5 +1,8 @@
 @page "/roles"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IDialogService DialogService
+
+
 
 <MudPaper Width="100%" Style="margin: 10px;">
     <MudDialog @bind-IsVisible="createDialogOpened">
@@ -161,7 +164,23 @@
         editDialogOpened = false;
     }
 
+
     private async Task OnDeleteRole(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteRole(id);
+            }            
+        }
+    }
+
+    private async Task DeleteRole(int id)
     {
         if (id > 0)
         {
