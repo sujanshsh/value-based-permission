@@ -1,17 +1,204 @@
 @page "/permissions"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IDialogService DialogService
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-16">
-    <MudText Typo="Typo.h3" GutterBottom="true">Counter</MudText>
-    <MudText Class="mb-4">Current count: @currentCount</MudText>
-    <MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">Click me</MudButton>
-</MudContainer>
+
+
+<MudPaper Width="100%" Style="margin: 10px;">
+    <MudDialog @bind-IsVisible="createDialogOpened">
+        <TitleContent>Create A Permission</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="newPermission.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="newPermission.description" Style="width: 300px;"/>
+            <MudTextField T="string" Label="Values" @bind-Value="newPermission.values" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelCreateDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitPermission">Create</MudButton>
+        </DialogActions>
+    </MudDialog>
+    <MudDialog @bind-IsVisible="editDialogOpened">
+        <TitleContent>Edit Permission</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="editPermission.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="editPermission.description" Style="width: 300px;"/>
+            <MudTextField T="string" Label="Values" @bind-Value="editPermission.values" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelEditDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitEditPermission">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="4">
+                <MudText Typo="Typo.h3">Permissions</MudText>
+            </MudItem>
+            <MudItem xs="3">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreatePermission">Create Permission</MudButton>
+            </MudItem>
+            <MudItem xs="12">
+            @if (permissions.Length > 0) {
+                <MudTable Items="@permissions" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Permission,bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Permissions</MudText>
+                        <MudToolBarSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Values</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.id</MudTd>
+                        <MudTd DataLabel="Name">@context.name</MudTd>
+                        <MudTd DataLabel="Description">@context.description</MudTd>
+                        <MudTd DataLabel="Description">@context.values</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeletePermission(context.id))" ></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            } else {
+                <MudAlert Severity="Severity.Normal">@(loadingPermissions ? "Loading..." : "No Data")</MudAlert>
+            }
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudPaper>
 
 @code {
-    private int currentCount = 0;
+    private Models.Permission[] permissions = new Models.Permission[0];
 
-    private void IncrementCount()
+    public Models.Permission newPermission = new Models.Permission();
+    public Models.Permission editPermission = new Models.Permission();
+
+    private bool loadingPermissions = false;
+    private string searchString = "";
+
+    [Inject]
+    private HttpClient httpClient { get; set; }
+
+    private bool createDialogOpened = false;
+    private bool editDialogOpened = false;
+    private bool FilterFunc(Models.Permission element)
     {
-        currentCount++;
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+
+    private async Task loadValueTypes()
+    {
+        loadingPermissions = true;
+        try
+        {
+            permissions = await httpClient.GetFromJsonAsync<Models.Permission[]>("permissions");
+        }
+        catch
+        {
+            loadingPermissions = false;
+        }
+        loadingPermissions = false;
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await loadValueTypes();
+    }
+
+    private void CancelCreateDialog() => createDialogOpened = false;
+    private void CancelEditDialog() => editDialogOpened = false;
+
+    private void OnCreatePermission()
+    {
+        createDialogOpened = true;
+    }
+
+    private void OnEditValueType(int id)
+    {
+        var selectedValueType = Array.FindAll<Models.Permission>(permissions, r => r.id == id).FirstOrDefault();
+        editPermission.id = selectedValueType.id;
+        editPermission.name = selectedValueType.name;
+        editPermission.description = selectedValueType.description;
+        editPermission.values = selectedValueType.values;
+        editDialogOpened = true;
+    }
+
+    private async Task OnSubmitPermission()
+    {
+        if (newPermission.name != "" && newPermission.description != "")
+        {
+            try
+            {
+                await httpClient.PostAsJsonAsync<Models.Permission>("permissions", newPermission);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
+        createDialogOpened = false;
+    }
+
+    private async Task OnSubmitEditPermission()
+    {
+        if (editPermission.name != "" && editPermission.description != "")
+        {
+            try
+            {
+                await httpClient.PutAsJsonAsync<Models.Permission>("permissions/" + editPermission.id, editPermission);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
+        editDialogOpened = false;
+    }
+
+
+    private async Task OnDeletePermission(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteRole(id);
+            }            
+        }
+    }
+
+    private async Task DeleteRole(int id)
+    {
+        if (id > 0)
+        {
+            try
+            {
+                await httpClient.DeleteAsync("permissions/" + id);
+            }
+            catch
+            {
+                return;
+            }
+            await loadValueTypes();
+        }
     }
 }

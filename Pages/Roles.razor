@@ -1,19 +1,70 @@
 @page "/roles"
-@inject IDialogService DialogService
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IDialogService DialogService
 
-<MudPaper Height="400px" Width="100%" Style="margin: 10px;">
+
+
+<MudPaper Width="100%" Style="margin: 10px;">
+    <MudDialog @bind-IsVisible="createDialogOpened">
+        <TitleContent>Create A Role</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="newRole.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="newRole.description" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelCreateDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitRole">Create</MudButton>
+        </DialogActions>
+    </MudDialog>
+    <MudDialog @bind-IsVisible="editDialogOpened">
+        <TitleContent>Edit Role</TitleContent>
+        <DialogContent>
+            <MudTextField T="string" Label="Name" @bind-Value="editRole.name"/>
+            <MudTextField T="string" Label="Description" @bind-Value="editRole.description" Style="width: 300px;"/>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelEditDialog">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="OnSubmitEditRole">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
     <MudContainer>
         <MudGrid>
             <MudItem xs="3">
                 <MudText Typo="Typo.h3">Roles</MudText>
             </MudItem>
             <MudItem xs="3">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="(e => OnCreateRole())">Create Role</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreateRole">Create Role</MudButton>
             </MudItem>
             <MudItem xs="12">
-                <RolesTable RolesData="roles" Loading="@loadingRoles">
-                </RolesTable>
+            @if (roles.Length > 0) {
+                <MudTable Items="@roles" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Role,bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Periodic Elements</MudText>
+                        <MudToolBarSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.id</MudTd>
+                        <MudTd DataLabel="Name">@context.name</MudTd>
+                        <MudTd DataLabel="Description">@context.description</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditRole(context.id))" > </MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteRole(context.id))" ></MudIconButton>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            } else {
+                <MudAlert Severity="Severity.Normal">@(loadingRoles ? "Loading..." : "No Data")</MudAlert>
+            }
             </MudItem>
         </MudGrid>
     </MudContainer>
@@ -22,19 +73,41 @@
 @code {
     private Models.Role[] roles = new Models.Role[0];
 
+    public Models.Role newRole = new Models.Role();
+    public Models.Role editRole = new Models.Role();
+
     private bool loadingRoles = false;
+    private string searchString = "";
 
     [Inject]
     private HttpClient httpClient { get; set; }
 
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private bool createDialogOpened = false;
+    private bool editDialogOpened = false;
 
-    void Close() => MudDialog.Close(DialogResult.Ok(true));
+    private bool FilterFunc(Models.Role element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
 
     private async Task loadRoles()
     {
         loadingRoles = true;
-        roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        try
+        {
+            roles = await httpClient.GetFromJsonAsync<Models.Role[]>("roles");
+        }
+        catch
+        {
+            loadingRoles = false;
+        }
         loadingRoles = false;
     }
     protected override async Task OnInitializedAsync()
@@ -42,22 +115,85 @@
         await loadRoles();
     }
 
-    private async Task OnCreateRole()
+    private void CancelCreateDialog() => createDialogOpened = false;
+    private void CancelEditDialog() => editDialogOpened = false;
+
+    private void OnCreateRole()
+    {
+        createDialogOpened = true;
+    }
+
+    private void OnEditRole(int id)
+    {
+        var roleToEdit = Array.FindAll<Models.Role>(roles, r => r.id == id).FirstOrDefault();
+        editRole.id = roleToEdit.id;
+        editRole.name = roleToEdit.name;
+        editRole.description = roleToEdit.description;
+        editDialogOpened = true;
+    }
+
+    private async Task OnSubmitRole()
+    {
+        if (newRole.name != "" && newRole.description != "")
+        {
+            try
+            {
+                await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
+            }
+            catch
+            {
+                return;
+            }
+            await loadRoles();
+        }
+        createDialogOpened = false;
+    }
+
+    private async Task OnSubmitEditRole()
+    {
+        if (editRole.name != "" && editRole.description != "")
+        {
+            try
+            {
+                await httpClient.PutAsJsonAsync<Models.Role>("roles/" + editRole.id, editRole);
+            }
+            catch
+            {
+                return;
+            }
+            await loadRoles();
+        }
+        editDialogOpened = false;
+    }
+
+
+    private async Task OnDeleteRole(int id)
     {
         var parameters = new DialogParameters();
-        parameters.Add("role", new Models.Role());
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteRole(id);
+            }            
+        }
+    }
 
-        var options = new DialogOptions();
-        options.CloseButton = true;
-
-        var dialog = await DialogService.Show<CreateRoleDialog>("Create A Role", parameters, options).Result;
-        
-        if (dialog.Data != null)
+    private async Task DeleteRole(int id)
+    {
+        if (id > 0)
         {
-            Models.Role newRole = dialog.Data as Models.Role;
- 
-            await httpClient.PostAsJsonAsync<Models.Role>("roles", newRole);
-
+            try
+            {
+                await httpClient.DeleteAsync("roles/" + id);
+            }
+            catch
+            {
+                return;
+            }
             await loadRoles();
         }
     }
