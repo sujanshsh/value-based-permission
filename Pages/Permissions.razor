@@ -181,12 +181,12 @@
         var result = await dialog.Result;
         if (!result.Cancelled) {
             if ((bool)result.Data == true) {
-                await DeleteRole(id);
+                await DeletePermission(id);
             }            
         }
     }
 
-    private async Task DeleteRole(int id)
+    private async Task DeletePermission(int id)
     {
         if (id > 0)
         {
