@@ -24,7 +24,7 @@
             </MudItem>
             <MudItem xs="12">
             @if (roles.Length > 0) {
-                <MudTable Items="@roles" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Role,bool>(FilterFunc)">
+                <MudTable Items="@roles" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.RolesOfUser,bool>(FilterFunc)">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Roles of Selected User</MudText>
                         <MudToolBarSpacer />
@@ -34,11 +34,15 @@
                         <MudTh>ID</MudTh>
                         <MudTh>Name</MudTh>
                         <MudTh>Description</MudTh>
+                        <MudTh>Action</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="ID">@context.id</MudTd>
                         <MudTd DataLabel="Description">@context.name</MudTd>
                         <MudTd DataLabel="Name">@context.description</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteUserRole(context.user_roles_id))" ></MudIconButton>
+                        </MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
@@ -53,7 +57,7 @@
 </MudPaper>
 
 @code {
-    private Models.Role[] roles = new Models.Role[0];
+    private Models.RolesOfUser[] roles = new Models.RolesOfUser[0];
 
     public Models.AppsUser selectedUser = null;
 
@@ -65,7 +69,7 @@
     [Inject]
     private HttpClient httpClient { get; set; }
 
-    private bool FilterFunc(Models.Role element)
+    private bool FilterFunc(Models.RolesOfUser element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
@@ -92,7 +96,7 @@
         loadingRoles = true;
         try
         {
-            roles = await httpClient.GetFromJsonAsync<Models.Role[]>($"users/{selectedUser.id}/roles");
+            roles = await httpClient.GetFromJsonAsync<Models.RolesOfUser[]>($"users/{selectedUser.id}/roles");
         }
         catch
         {
@@ -109,4 +113,36 @@
         await httpClient.PostAsJsonAsync<Models.UserRole>("user-roles", userRole);
         await loadRolesOfUser(selectedUser);
     }
+
+    private async Task OnDeleteUserRole(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteUserRole(id);
+            }            
+        }
+    }
+
+    private async Task DeleteUserRole(int id)
+    {
+        if (id > 0)
+        {
+            try
+            {
+                await httpClient.DeleteAsync("user-roles/" + id);
+            }
+            catch
+            {
+                return;
+            }
+            await loadRolesOfUser(selectedUser);
+        }
+    }
+
 }
