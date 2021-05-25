@@ -1,0 +1,112 @@
+@page "/user-roles"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject IDialogService DialogService
+
+
+
+<MudPaper Width="100%" Style="margin: 10px;">
+    <MudContainer>
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h3">User Roles</MudText>
+            </MudItem>
+            <MudItem xs="12">
+                <MudAutocomplete T="Models.AppsUser" Label="Select A User" 
+                         SearchFunc="@SearchUser" ToStringFunc="@(e=> e==null?null : $"{e.email} ({e.name})")" 
+                         ValueChanged="loadRolesOfUser" /> 
+            </MudItem>
+            <MudItem xs="12">
+                <MudAutocomplete T="Models.Role" Label="Select A Role" @bind-Value="selectedRole" 
+                         SearchFunc="@searchRole" ToStringFunc="@(e=> e==null?null : $"{e.name} ({e.description})")" /> 
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddRoleToUser">Add Role to the User</MudButton>
+            </MudItem>
+            <MudItem xs="12">
+            @if (roles.Length > 0) {
+                <MudTable Items="@roles" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Role,bool>(FilterFunc)">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Roles of Selected User</MudText>
+                        <MudToolBarSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="ID">@context.id</MudTd>
+                        <MudTd DataLabel="Description">@context.name</MudTd>
+                        <MudTd DataLabel="Name">@context.description</MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            } else {
+                <MudAlert Severity="Severity.Normal">@(loadingRoles ? "Loading..." : "No Data")</MudAlert>
+            }
+            </MudItem>
+        </MudGrid>
+    </MudContainer>
+</MudPaper>
+
+@code {
+    private Models.Role[] roles = new Models.Role[0];
+
+    public Models.AppsUser selectedUser = null;
+
+    public Models.Role selectedRole = null;
+
+    private string searchString = "";
+    private bool loadingRoles = false;
+
+    [Inject]
+    private HttpClient httpClient { get; set; }
+
+    private bool FilterFunc(Models.Role element)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task<IEnumerable<Models.AppsUser>> SearchUser(string value)
+    {
+        return await httpClient.GetFromJsonAsync<List<Models.AppsUser>>($"users/like?name={value}");
+    }
+
+    private async Task<IEnumerable<Models.Role>> searchRole(string value)
+    {
+        return await httpClient.GetFromJsonAsync<List<Models.Role>>($"roles/like?name={value}");
+    }
+
+    private async Task loadRolesOfUser(Models.AppsUser user)
+    {
+        selectedUser = user;
+        loadingRoles = true;
+        try
+        {
+            roles = await httpClient.GetFromJsonAsync<Models.Role[]>($"users/{selectedUser.id}/roles");
+        }
+        catch
+        {
+            loadingRoles = false;
+        }
+        loadingRoles = false;
+    }
+
+    private async Task OnAddRoleToUser()
+    {
+        Models.UserRole userRole = new Models.UserRole();
+        userRole.user_id = selectedUser.id;
+        userRole.role_id = selectedRole.id;        
+        await httpClient.PostAsJsonAsync<Models.UserRole>("user-roles", userRole);
+        await loadRolesOfUser(selectedUser);
+    }
+}
