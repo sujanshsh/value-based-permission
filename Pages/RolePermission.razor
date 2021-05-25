@@ -20,6 +20,9 @@
                          SearchFunc="@SearchPermission" ToStringFunc="@(e=> e==null?null : $"{e.name} ({e.description})")" /> 
             </MudItem>
             <MudItem xs="12">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddPermissionToRole">Add Permission to the Role</MudButton>
+            </MudItem>
+            <MudItem xs="12">
             @if (permissions.Length > 0) {
                 <MudTable Items="@permissions" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Permission,bool>(FilterFunc)">
                     <ToolBarContent>
@@ -54,9 +57,9 @@
 @code {
     private Models.Permission[] permissions = new Models.Permission[0];
 
-    public Models.Role selectedRole = new Models.Role();
+    public Models.Role selectedRole = null;
 
-    public Models.Permission selectedPermission = new Models.Permission();
+    public Models.Permission selectedPermission = null;
 
     private string searchString = "";
     private bool loadingPermissions = false;
@@ -100,5 +103,14 @@
             loadingPermissions = false;
         }
         loadingPermissions = false;
+    }
+
+    private async Task OnAddPermissionToRole()
+    {
+        Models.RolePermission rolePermission = new Models.RolePermission();
+        rolePermission.role_id = selectedRole.id;
+        rolePermission.permission_id = selectedPermission.id;
+        await httpClient.PostAsJsonAsync<Models.RolePermission>("role-permissions", rolePermission);
+        await loadPermissionsOfRole(selectedRole);
     }
 }
