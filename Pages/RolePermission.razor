@@ -24,7 +24,7 @@
             </MudItem>
             <MudItem xs="12">
             @if (permissions.Length > 0) {
-                <MudTable Items="@permissions" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.Permission,bool>(FilterFunc)">
+                <MudTable Items="@permissions" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.PermissionsOfRole,bool>(FilterFunc)">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Permissions of Selected Role</MudText>
                         <MudToolBarSpacer />
@@ -35,12 +35,16 @@
                         <MudTh>Name</MudTh>
                         <MudTh>Description</MudTh>
                         <MudTh>Values</MudTh>
+                        <MudTh>Action</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="ID">@context.id</MudTd>
                         <MudTd DataLabel="Description">@context.name</MudTd>
                         <MudTd DataLabel="Name">@context.description</MudTd>
                         <MudTd DataLabel="Name">@context.values</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteRolePermission(context.role_permissions_id))" ></MudIconButton>
+                        </MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
@@ -55,7 +59,7 @@
 </MudPaper>
 
 @code {
-    private Models.Permission[] permissions = new Models.Permission[0];
+    private Models.PermissionsOfRole[] permissions = new Models.PermissionsOfRole[0];
 
     public Models.Role selectedRole = null;
 
@@ -67,7 +71,7 @@
     [Inject]
     private HttpClient httpClient { get; set; }
 
-    private bool FilterFunc(Models.Permission element)
+    private bool FilterFunc(Models.PermissionsOfRole element)
     {
         if (string.IsNullOrWhiteSpace(searchString))
             return true;
@@ -96,7 +100,7 @@
         loadingPermissions = true;
         try
         {
-            permissions = await httpClient.GetFromJsonAsync<Models.Permission[]>($"roles/{selectedRole.id}/permissions");
+            permissions = await httpClient.GetFromJsonAsync<Models.PermissionsOfRole[]>($"roles/{selectedRole.id}/permissions");
         }
         catch
         {
@@ -112,5 +116,35 @@
         rolePermission.permission_id = selectedPermission.id;
         await httpClient.PostAsJsonAsync<Models.RolePermission>("role-permissions", rolePermission);
         await loadPermissionsOfRole(selectedRole);
+    }
+    private async Task OnDeleteRolePermission(int id)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("DialogContent", "Are you sure you want to delete?");
+        parameters.Add("CancelText", "No");
+        parameters.Add("OkText", "Yes");
+        var dialog = DialogService.Show<SimpleDialog>("Confirmation", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled) {
+            if ((bool)result.Data == true) {
+                await DeleteRolePermission(id);
+            }            
+        }
+    }
+
+    private async Task DeleteRolePermission(int id)
+    {
+        if (id > 0)
+        {
+            try
+            {
+                await httpClient.DeleteAsync("role-permissions/" + id);
+            }
+            catch
+            {
+                return;
+            }
+            await loadPermissionsOfRole(selectedRole);
+        }
     }
 }
