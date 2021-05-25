@@ -11,8 +11,9 @@
                 <MudText Typo="Typo.h3">Application Users</MudText>
             </MudItem>
             <MudItem xs="12">
-                <MudAutocomplete T="Models.Role" Label="Select A Role" @bind-Value="selectedRole" 
-                         SearchFunc="@SearchRole" ToStringFunc="@(e=> e==null?null : $"{e.name} ({e.description})")" /> 
+                <MudAutocomplete T="Models.Role" Label="Select A Role" 
+                         SearchFunc="@SearchRole" ToStringFunc="@(e=> e==null?null : $"{e.name} ({e.description})")" 
+                         ValueChanged="loadPermissionsOfRole" /> 
             </MudItem>
             <MudItem xs="12">
                 <MudAutocomplete T="Models.Permission" Label="Select A Permission" @bind-Value="selectedPermission" 
@@ -86,8 +87,9 @@
         return await httpClient.GetFromJsonAsync<List<Models.Permission>>($"permissions/like?name={value}");
     }
 
-    private async Task loadPermissionsOfRole()
+    private async Task loadPermissionsOfRole(Models.Role role)
     {
+        selectedRole = role;
         loadingPermissions = true;
         try
         {
