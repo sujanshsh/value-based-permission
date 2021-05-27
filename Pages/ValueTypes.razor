@@ -3,76 +3,77 @@
 @inject IDialogService DialogService
 
 
-
-<MudPaper Width="100%" Style="margin: 10px;">
-    <MudDialog @bind-IsVisible="createDialogOpened">
-        <TitleContent>Create A Value Type</TitleContent>
-        <DialogContent>
-            <MudTextField T="string" Label="Name" @bind-Value="newValueType.name"/>
-            <MudTextField T="string" Label="Description" @bind-Value="newValueType.description" Style="width: 300px;"/>
-            <MudTextField T="string" Label="URL" @bind-Value="newValueType.URL" Style="width: 300px;"/>
-        </DialogContent>
-        <DialogActions>
-            <MudButton OnClick="CancelCreateDialog">Cancel</MudButton>
-            <MudButton Color="Color.Primary" OnClick="OnSubmitValueType">Create</MudButton>
-        </DialogActions>
-    </MudDialog>
-    <MudDialog @bind-IsVisible="editDialogOpened">
-        <TitleContent>Edit Value Type</TitleContent>
-        <DialogContent>
-            <MudTextField T="string" Label="Name" @bind-Value="editValueType.name"/>
-            <MudTextField T="string" Label="Description" @bind-Value="editValueType.description" Style="width: 300px;"/>
-            <MudTextField T="string" Label="URL" @bind-Value="editValueType.URL" Style="width: 300px;"/>
-        </DialogContent>
-        <DialogActions>
-            <MudButton OnClick="CancelEditDialog">Cancel</MudButton>
-            <MudButton Color="Color.Primary" OnClick="OnSubmitEditValueType">Save</MudButton>
-        </DialogActions>
-    </MudDialog>
-    <MudContainer>
-        <MudGrid>
-            <MudItem xs="3">
-                <MudText Typo="Typo.h3">Types of Values</MudText>
-            </MudItem>
-            <MudItem xs="3">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreateValueType">Create Value Type</MudButton>
-            </MudItem>
-            <MudItem xs="12">
-            @if (valueTypes.Length > 0) {
-                <MudTable Items="@valueTypes" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.ValueType,bool>(FilterFunc)">
-                    <ToolBarContent>
-                        <MudText Typo="Typo.h6">Types of Values</MudText>
-                        <MudToolBarSpacer />
-                        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                    </ToolBarContent>
-                    <HeaderContent>
-                        <MudTh>ID</MudTh>
-                        <MudTh>Name</MudTh>
-                        <MudTh>Description</MudTh>
-                        <MudTh>URL</MudTh>
-                        <MudTh>Action</MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        <MudTd DataLabel="ID">@context.id</MudTd>
-                        <MudTd DataLabel="Name">@context.name</MudTd>
-                        <MudTd DataLabel="Description">@context.description</MudTd>
-                        <MudTd DataLabel="Description">@context.URL</MudTd>
-                        <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteValueType(context.id))" ></MudIconButton>
-                        </MudTd>
-                    </RowTemplate>
-                    <PagerContent>
-                        <MudTablePager />
-                    </PagerContent>
-                </MudTable>
-            } else {
-                <MudAlert Severity="Severity.Normal">@(loadingValueTypes ? "Loading..." : "No Data")</MudAlert>
-            }
-            </MudItem>
-        </MudGrid>
-    </MudContainer>
-</MudPaper>
+<AuthorizeView Roles="SuperAdmin" Context="auth_context">
+    <MudPaper Width="100%" Style="margin: 10px;">
+        <MudDialog @bind-IsVisible="createDialogOpened">
+            <TitleContent>Create A Value Type</TitleContent>
+            <DialogContent>
+                <MudTextField T="string" Label="Name" @bind-Value="newValueType.name"/>
+                <MudTextField T="string" Label="Description" @bind-Value="newValueType.description" Style="width: 300px;"/>
+                <MudTextField T="string" Label="URL" @bind-Value="newValueType.URL" Style="width: 300px;"/>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="CancelCreateDialog">Cancel</MudButton>
+                <MudButton Color="Color.Primary" OnClick="OnSubmitValueType">Create</MudButton>
+            </DialogActions>
+        </MudDialog>
+        <MudDialog @bind-IsVisible="editDialogOpened">
+            <TitleContent>Edit Value Type</TitleContent>
+            <DialogContent>
+                <MudTextField T="string" Label="Name" @bind-Value="editValueType.name"/>
+                <MudTextField T="string" Label="Description" @bind-Value="editValueType.description" Style="width: 300px;"/>
+                <MudTextField T="string" Label="URL" @bind-Value="editValueType.URL" Style="width: 300px;"/>
+            </DialogContent>
+            <DialogActions>
+                <MudButton OnClick="CancelEditDialog">Cancel</MudButton>
+                <MudButton Color="Color.Primary" OnClick="OnSubmitEditValueType">Save</MudButton>
+            </DialogActions>
+        </MudDialog>
+        <MudContainer>
+            <MudGrid>
+                <MudItem xs="3">
+                    <MudText Typo="Typo.h3">Types of Values</MudText>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreateValueType">Create Value Type</MudButton>
+                </MudItem>
+                <MudItem xs="12">
+                @if (valueTypes.Length > 0) {
+                    <MudTable Items="@valueTypes" Dense="@true" Hover="@true" Bordered="@true" Striped="@true" Filter="new Func<Models.ValueType,bool>(FilterFunc)">
+                        <ToolBarContent>
+                            <MudText Typo="Typo.h6">Types of Values</MudText>
+                            <MudToolBarSpacer />
+                            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                        </ToolBarContent>
+                        <HeaderContent>
+                            <MudTh>ID</MudTh>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Description</MudTh>
+                            <MudTh>URL</MudTh>
+                            <MudTh>Action</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="ID">@context.id</MudTd>
+                            <MudTd DataLabel="Name">@context.name</MudTd>
+                            <MudTd DataLabel="Description">@context.description</MudTd>
+                            <MudTd DataLabel="Description">@context.URL</MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteValueType(context.id))" ></MudIconButton>
+                            </MudTd>
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager />
+                        </PagerContent>
+                    </MudTable>
+                } else {
+                    <MudAlert Severity="Severity.Normal">@(loadingValueTypes ? "Loading..." : "No Data")</MudAlert>
+                }
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </MudPaper>
+</AuthorizeView>
 
 @code {
     private Models.ValueType[] valueTypes = new Models.ValueType[0];

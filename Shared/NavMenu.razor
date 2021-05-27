@@ -2,7 +2,9 @@
     <MudNavLink Href="/" Icon="@Icons.Filled.Home">Home</MudNavLink>
     <MudNavLink Href="/roles" Icon="@Icons.Filled.Person">Roles</MudNavLink>
     <MudNavLink Href="/permissions" Icon="@Icons.Filled.LockOpen">Permissions</MudNavLink>
-    <MudNavLink Href="/value-types" Icon="@Icons.Filled.DragHandle">Types of Values</MudNavLink>
+    <AuthorizeView Roles="SuperAdmin">
+        <MudNavLink Href="/value-types" Icon="@Icons.Filled.DragHandle">Types of Values</MudNavLink>
+    </AuthorizeView>
     <MudNavLink Href="/users" Icon="@Icons.Filled.SupervisorAccount">Users</MudNavLink>
     <MudNavLink Href="/role-permissions" Icon="@Icons.Filled.AccountTree">Role Permissions</MudNavLink>
     <MudNavLink Href="/user-roles" Icon="@Icons.Filled.AccountTree">User Roles</MudNavLink>
