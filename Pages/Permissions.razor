@@ -67,7 +67,7 @@
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh>ID</MudTh>
-                        <MudTh>Name</MudTh>
+                        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Models.Permission, object>(x=>x.name)">Name</MudTableSortLabel></MudTh>
                         <MudTh>Suffix</MudTh>
                         <MudTh>Description</MudTh>
                         <MudTh>Value Type</MudTh>
@@ -177,7 +177,6 @@
         editPermission.name = selectedPermission.name;
         editPermission.suffix = selectedPermission.suffix;
         editPermission.description = selectedPermission.description;
-        editPermission.value_type_id = selectedValueTypeForEdit.id;
         editPermission.values = selectedPermission.values;
         editDialogOpened = true;
     }
@@ -186,7 +185,7 @@
     {
         if (newPermission.name != "" && newPermission.description != "")
         {
-            newPermission.value_type_id = selectedValueType.id;
+            newPermission.value_type_id = selectedValueType.id == 0 ? null : selectedValueType.id;
             try
             {
                 await httpClient.PostAsJsonAsync<Models.Permission>("permissions", newPermission);
@@ -204,6 +203,7 @@
     {
         if (editPermission.name != "" && editPermission.description != "")
         {
+            editPermission.value_type_id = selectedValueTypeForEdit.id == 0 ? null : selectedValueTypeForEdit.id;
             try
             {
                 await httpClient.PutAsJsonAsync<Models.Permission>("permissions/" + editPermission.id, editPermission);
