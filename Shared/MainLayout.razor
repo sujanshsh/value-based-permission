@@ -18,9 +18,12 @@
         <MudAppBarSpacer />
         <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="OnLogout" />
     </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
+    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" DrawerWidthLeft="350px">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h6">Mudblazor Template</MudText>
+            <MudText Typo="Typo.subtitle2">
+                <MudIconButton Icon="@Icons.Material.Filled.SupervisorAccount" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                AccessControlAdmin
+            </MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>

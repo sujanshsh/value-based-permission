@@ -59,7 +59,7 @@
                         <MudTd DataLabel="Description">@context.URL</MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteRole(context.id))" ></MudIconButton>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteValueType(context.id))" ></MudIconButton>
                         </MudTd>
                     </RowTemplate>
                     <PagerContent>
@@ -95,6 +95,8 @@
         if (element.name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.URL.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         return false;
     }
@@ -171,7 +173,7 @@
     }
 
 
-    private async Task OnDeleteRole(int id)
+    private async Task OnDeleteValueType(int id)
     {
         var parameters = new DialogParameters();
         parameters.Add("DialogContent", "Are you sure you want to delete?");
@@ -181,12 +183,12 @@
         var result = await dialog.Result;
         if (!result.Cancelled) {
             if ((bool)result.Data == true) {
-                await DeleteRole(id);
+                await DeleteValueType(id);
             }            
         }
     }
 
-    private async Task DeleteRole(int id)
+    private async Task DeleteValueType(int id)
     {
         if (id > 0)
         {

@@ -9,7 +9,17 @@
         <TitleContent>Create A Permission</TitleContent>
         <DialogContent>
             <MudTextField T="string" Label="Name" @bind-Value="newPermission.name"/>
+            <MudTextField T="string" Label="Suffix" @bind-Value="newPermission.suffix"/>
             <MudTextField T="string" Label="Description" @bind-Value="newPermission.description" Style="width: 300px;"/>
+            <MudSelect T="Models.ValueType" Label="Type of Value" Strict="true" Variant="Variant.Outlined" @bind-Value="selectedValueType">
+                @if(valueTypes != null) {
+                    foreach(Models.ValueType vt in valueTypes) {
+                        <MudSelectItem Value="@vt">
+                            @($"{vt.name} ({vt.description})")
+                        </MudSelectItem>
+                    }
+                }
+            </MudSelect>
             <MudTextField T="string" Label="Values" @bind-Value="newPermission.values" Style="width: 300px;"/>
         </DialogContent>
         <DialogActions>
@@ -21,7 +31,17 @@
         <TitleContent>Edit Permission</TitleContent>
         <DialogContent>
             <MudTextField T="string" Label="Name" @bind-Value="editPermission.name"/>
+            <MudTextField T="string" Label="Suffix" @bind-Value="editPermission.suffix"/>
             <MudTextField T="string" Label="Description" @bind-Value="editPermission.description" Style="width: 300px;"/>
+            <MudSelect T="Models.ValueType" Label="Type of Value" Strict="true" Variant="Variant.Outlined" @bind-Value="selectedValueTypeForEdit">
+                @if(valueTypes != null) {
+                    foreach(Models.ValueType vt in valueTypes) {
+                        <MudSelectItem Value="@vt">
+                            @($"{vt.name} ({vt.description})")
+                        </MudSelectItem>
+                    }
+                }
+            </MudSelect>
             <MudTextField T="string" Label="Values" @bind-Value="editPermission.values" Style="width: 300px;"/>
         </DialogContent>
         <DialogActions>
@@ -47,15 +67,19 @@
                     </ToolBarContent>
                     <HeaderContent>
                         <MudTh>ID</MudTh>
-                        <MudTh>Name</MudTh>
+                        <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Models.Permission, object>(x=>x.name)">Name</MudTableSortLabel></MudTh>
+                        <MudTh>Suffix</MudTh>
                         <MudTh>Description</MudTh>
+                        <MudTh>Value Type</MudTh>
                         <MudTh>Values</MudTh>
                         <MudTh>Action</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="ID">@context.id</MudTd>
                         <MudTd DataLabel="Name">@context.name</MudTd>
+                        <MudTd DataLabel="Name">@context.suffix</MudTd>
                         <MudTd DataLabel="Description">@context.description</MudTd>
+                        <MudTd DataLabel="Description">@context.value_type_name</MudTd>
                         <MudTd DataLabel="Description">@context.values</MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="@Size.Small" OnClick="@((e) => OnEditValueType(context.id))" > </MudIconButton>
@@ -80,6 +104,9 @@
     public Models.Permission newPermission = new Models.Permission();
     public Models.Permission editPermission = new Models.Permission();
 
+    private Models.ValueType[] valueTypes = null;
+    private Models.ValueType selectedValueType = new Models.ValueType();
+    private Models.ValueType selectedValueTypeForEdit = new Models.ValueType();
     private bool loadingPermissions = false;
     private string searchString = "";
 
@@ -96,26 +123,43 @@
             return true;
         if (element.description.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
+        if (element.values.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
         return false;
     }
 
 
-    private async Task loadValueTypes()
+    private async Task LoadPermissions()
     {
         loadingPermissions = true;
         try
         {
             permissions = await httpClient.GetFromJsonAsync<Models.Permission[]>("permissions");
         }
-        catch
+        catch(Exception ex)
         {
+            Console.WriteLine(ex.Message);
             loadingPermissions = false;
         }
         loadingPermissions = false;
     }
+
+    private async Task LoadValueTypes()
+    {
+        try
+        {
+            valueTypes = await httpClient.GetFromJsonAsync<Models.ValueType[]>("value-types");
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
-        await loadValueTypes();
+        await LoadPermissions();
+        await LoadValueTypes();
     }
 
     private void CancelCreateDialog() => createDialogOpened = false;
@@ -128,11 +172,12 @@
 
     private void OnEditValueType(int id)
     {
-        var selectedValueType = Array.FindAll<Models.Permission>(permissions, r => r.id == id).FirstOrDefault();
-        editPermission.id = selectedValueType.id;
-        editPermission.name = selectedValueType.name;
-        editPermission.description = selectedValueType.description;
-        editPermission.values = selectedValueType.values;
+        var selectedPermission = Array.FindAll<Models.Permission>(permissions, r => r.id == id).FirstOrDefault();
+        editPermission.id = selectedPermission.id;
+        editPermission.name = selectedPermission.name;
+        editPermission.suffix = selectedPermission.suffix;
+        editPermission.description = selectedPermission.description;
+        editPermission.values = selectedPermission.values;
         editDialogOpened = true;
     }
 
@@ -140,6 +185,7 @@
     {
         if (newPermission.name != "" && newPermission.description != "")
         {
+            newPermission.value_type_id = selectedValueType.id == 0 ? null : selectedValueType.id;
             try
             {
                 await httpClient.PostAsJsonAsync<Models.Permission>("permissions", newPermission);
@@ -148,7 +194,7 @@
             {
                 return;
             }
-            await loadValueTypes();
+            await LoadPermissions();
         }
         createDialogOpened = false;
     }
@@ -157,6 +203,7 @@
     {
         if (editPermission.name != "" && editPermission.description != "")
         {
+            editPermission.value_type_id = selectedValueTypeForEdit.id == 0 ? null : selectedValueTypeForEdit.id;
             try
             {
                 await httpClient.PutAsJsonAsync<Models.Permission>("permissions/" + editPermission.id, editPermission);
@@ -165,7 +212,7 @@
             {
                 return;
             }
-            await loadValueTypes();
+            await LoadPermissions();
         }
         editDialogOpened = false;
     }
@@ -181,12 +228,12 @@
         var result = await dialog.Result;
         if (!result.Cancelled) {
             if ((bool)result.Data == true) {
-                await DeleteRole(id);
+                await DeletePermission(id);
             }            
         }
     }
 
-    private async Task DeleteRole(int id)
+    private async Task DeletePermission(int id)
     {
         if (id > 0)
         {
@@ -198,7 +245,7 @@
             {
                 return;
             }
-            await loadValueTypes();
+            await LoadPermissions();
         }
     }
 }
