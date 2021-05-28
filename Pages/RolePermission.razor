@@ -33,14 +33,18 @@
                     <HeaderContent>
                         <MudTh>ID</MudTh>
                         <MudTh>Name</MudTh>
+                        <MudTh>Suffix</MudTh>
                         <MudTh>Description</MudTh>
+                        <MudTh>Value Type</MudTh>
                         <MudTh>Values</MudTh>
                         <MudTh>Action</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="ID">@context.id</MudTd>
                         <MudTd DataLabel="Description">@context.name</MudTd>
+                        <MudTd DataLabel="Description">@context.suffix</MudTd>
                         <MudTd DataLabel="Name">@context.description</MudTd>
+                        <MudTd DataLabel="Name">@context.value_type_name</MudTd>
                         <MudTd DataLabel="Name">@context.values</MudTd>
                         <MudTd>
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Secondary" Size="@Size.Small" OnClick="@((e) => OnDeleteRolePermission(context.role_permissions_id))" ></MudIconButton>
