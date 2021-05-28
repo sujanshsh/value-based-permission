@@ -13,20 +13,25 @@
 
 <MudLayout>
 @if(!NavigationManager.ToBaseRelativePath(NavigationManager.Uri).StartsWith("login")) {
-    <MudAppBar Elevation="0">
-        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-        <MudAppBarSpacer />
-        <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="OnLogout" />
-    </MudAppBar>
-    <MudDrawer @bind-Open="_drawerOpen" Elevation="1" DrawerWidthLeft="350px">
-        <MudDrawerHeader>
-            <MudText Typo="Typo.subtitle2">
-                <MudIconButton Icon="@Icons.Material.Filled.SupervisorAccount" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-                AccessControlAdmin
-            </MudText>
-        </MudDrawerHeader>
-        <NavMenu />
-    </MudDrawer>
+    <AuthorizeView>
+        <Authorized>
+            <MudAppBar Elevation="0">
+                <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                <MudAppBarSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Inherit" OnClick="OnLogout" />
+            </MudAppBar>
+            <MudDrawer @bind-Open="_drawerOpen" Elevation="1" DrawerWidthLeft="350px">
+                <MudDrawerHeader>
+                    <MudText Typo="Typo.subtitle2">
+                        <MudIconButton Icon="@Icons.Material.Filled.SupervisorAccount" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                        AccessControlAdmin
+                    </MudText>
+                </MudDrawerHeader>
+                <NavMenu />
+            </MudDrawer>
+        </Authorized>
+        <NotAuthorized> </NotAuthorized>
+    </AuthorizeView>
 }
     <MudMainContent>
         @Body
