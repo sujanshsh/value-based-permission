@@ -82,12 +82,12 @@
 
     private async Task<IEnumerable<Models.AppsUser>> SearchUser(string value)
     {
-        return await httpClient.GetFromJsonAsync<List<Models.AppsUser>>($"users/like?name={value}");
+        return await httpClient.GetFromJsonAsync<List<Models.AppsUser>>($"users/like?name={value}&email={value}");
     }
 
     private async Task<IEnumerable<Models.Role>> searchRole(string value)
     {
-        return await httpClient.GetFromJsonAsync<List<Models.Role>>($"roles/like?name={value}");
+        return await httpClient.GetFromJsonAsync<List<Models.Role>>($"roles/like?name={value}&description={value}");
     }
 
     private async Task loadRolesOfUser(Models.AppsUser user)
