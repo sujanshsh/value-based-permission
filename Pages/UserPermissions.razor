@@ -80,7 +80,7 @@
 
     private async Task<IEnumerable<Models.AppsUser>> SearchUser(string value)
     {
-        return await httpClient.GetFromJsonAsync<List<Models.AppsUser>>($"users/like?name={value}");
+        return await httpClient.GetFromJsonAsync<List<Models.AppsUser>>($"users/like?name={value}&email={value}");
     }
 
     private async Task loadPermissionsOfUser(Models.AppsUser user)
